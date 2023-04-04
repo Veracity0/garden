@@ -79,8 +79,8 @@ import <vprops.ash>;
 //    "colossal free-range mushroom"	day 11+: 1 colossal free-range mushroom
 // Rock Garden (plot 1)
 //    "groveling gravel"		day 1: 1 groveling gravel
-//    "2 groveling gravel"		day 2: 2 groveling gravels
-//    "3 groveling gravel"		day 3: 3 groveling gravels
+//    "2 groveling gravel"		day 2: 2 handfuls of groveling gravel
+//    "3 groveling gravel"		day 3: 3 handfuls of groveling gravel
 //    "fruity pebble"			day 4: 1 fruity pebble
 //    "2 fruity pebbles"		day 5: 2 fruity pebbles
 //    "3 fruity pebbles"		day 6: 3 fruity pebbles
@@ -738,21 +738,25 @@ void harvest_garden()
     }
 
     int [item] campground = get_campground();
-
     boolean have_garden = false;
 
-    boolean should_harvest = false;
-    boolean should_harvest_plot1 = false;
-    boolean should_harvest_plot2 = false;
-    boolean should_harvest_plot3 = false;
-    int pre_fertilize = 0;
-
-    boolean fight_skulldozer = false;
-    boolean have_grass_patch = false;
-    boolean have_mushroom_garden = false;
-    boolean have_rock_garden = false;
-
     foreach it, n in campground {
+	// You can only have one kind of garden in your campground.
+	// 
+	// A garden can have multiple plots, each with its own crop.
+	//
+	// If we detect such a plot, we must continue the loop and look
+	// for additonal plots
+
+	boolean should_harvest = false;
+	string plot = "";
+
+	// Certain kinds of garden require special handling
+	boolean fight_skulldozer = false;
+	boolean have_grass_patch = false;
+	int pre_fertilize = 0;
+	boolean have_mushroom_garden = false;
+
 	switch ( it ) {
 	case PUMPKIN:
 	case HUGE_PUMPKIN:
@@ -798,76 +802,86 @@ void harvest_garden()
 	    break;
 	case ROCK_SEEDS:
 	    have_garden = true;
-	    // Rock Garden has three plots which can be harvested independently
-	    have_rock_garden = true;
 	    continue;
 	case GROVELING_GRAVEL:
 	case FRUITY_PEBBLE:
 	case LODESTONE:
-	    // Rock Garden plot 1
-	    should_harvest |= should_harvest_plot1 = harvest_rock_plot1( it, n);
-	    continue;
+	    have_garden = true;
+	    plot = "plot1";
+	    should_harvest = harvest_rock_plot1( it, n);
+	    break;
 	case MILESTONE:
 	case BOLDER_BOULDER:
 	case MOLEHILL_MOUNTAIN:
-	    // Rock Garden plot 2
-	    should_harvest |= should_harvest_plot2 = harvest_rock_plot2( it, n);
-	    continue;
+	    have_garden = true;
+	    plot = "plot2";
+	    should_harvest = harvest_rock_plot2( it, n);
+	    break;
 	case WHET_STONE:
 	case HARD_ROCK:
 	case STRANGE_STALAGMITE:
-	    // Rock Garden plot 3
-	    should_harvest |= should_harvest_plot3 = harvest_rock_plot3( it, n);
-	    continue;
+	    have_garden = true;
+	    plot = "plot3";
+	    should_harvest = harvest_rock_plot3( it, n);
+	    break;
 	default:
 	    continue;
 	}
-    }
 
-    if (!have_garden) {
-	print( "You don't have a garden in your campground." );
-	return;
-    }
+	if ( fight_skulldozer ) {
+	    print( "Fight! Fight! Fight!" );
+	    visit_url( "campground.php?action=garden" );
+	    run_combat();
+	    break;
+	}
 
-    if ( fight_skulldozer ) {
-	print( "Fight! Fight! Fight!" );
-	visit_url( "campground.php?action=garden" );
-	run_combat();
-    } else if ( should_harvest ) {
-	print( "It's time to harvest!" );
-	if ( have_grass_patch ) {
-	    // Optionally fertilize it
-	    fertilize_grass( pre_fertilize );
-	    // Pick your crop
-	    cli_execute( "garden pick" );
-	    // Optionally fertilize and pick it
-	    fertilize_and_pick_grass();
-	} else if ( have_rock_garden ) {
-	    if ( should_harvest_plot1 ) {
-		cli_execute( "garden pick plot1" );
+	if ( should_harvest ) {
+	    print( "It's time to harvest!" );
+	    if ( have_grass_patch ) {
+		// Optionally fertilize it
+		fertilize_grass( pre_fertilize );
+		// Pick your crop
+		cli_execute( "garden pick" );
+		// Optionally fertilize and pick it
+		fertilize_and_pick_grass();
+		break;
 	    }
-	    if ( should_harvest_plot2 ) {
-		cli_execute( "garden pick plot2" );
+
+	    // If a garden has multiple plots, pick it and look for more.
+	    if (plot != "") {
+		// cli_execute( "garden pick " + plot );
+		continue;
 	    }
-	    if ( should_harvest_plot3 ) {
-		cli_execute( "garden pick plot3" );
-	    }
-	} else {
-	    // Pick your crop
-	    cli_execute( "garden pick" );
+
+	    // Otherwise, pick the whole garden in one go.
+	    // cli_execute( "garden pick" );
+	    break;
 	}
-    } else if ( have_mushroom_garden ) {
-	if ( vgh_mushroom_crop != "" ) {
-	    print( "Let's fertilize your mushroom so it will grow." );
-	    cli_execute( "garden fertilize" );
+
+	if ( have_mushroom_garden ) {
+	    if ( vgh_mushroom_crop != "" ) {
+		print( "Let's fertilize your mushroom so it will grow." );
+		cli_execute( "garden fertilize" );
+	    }
+	    break;
 	}
-    } else {
+
 	print( "Let it grow some more." );
 
 	// If you have a Tall Grass Patch, optionally fertilize and pick it
 	if ( have_grass_patch ) {
 	    fertilize_and_pick_grass();
 	}
+
+	// If the garden doesn't have multiple plots, we're done
+	if ( plot == "" ) {
+	    break;
+	}
+    }
+
+    if (!have_garden) {
+	print( "You don't have a garden in your campground." );
+	return;
     }
 }
 
