@@ -42,65 +42,65 @@ import <vprops.ash>;
 //-------------------------------------------------------------------------
 
 // Pumpkin Patch
-//    "pumpkin"				days 1-4: 1 pumpkin per day
-//    "huge pumpkin"			days 5-10: 1 huge pumpkin
-//    "ginormous pumpkin"		day 11+: 1 ginormous pumpkin
+//    "pumpkin"                         days 1-4: 1 pumpkin per day
+//    "huge pumpkin"                    days 5-10: 1 huge pumpkin
+//    "ginormous pumpkin"               day 11+: 1 ginormous pumpkin
 // Peppermint Patch
-//    "peppermint sprout"		days 1-4: 3 peppermint sprouts per day
-//    "giant candy cane"		day 5+: 1 giant candy cane
+//    "peppermint sprout"               days 1-4: 3 peppermint sprouts per day
+//    "giant candy cane"                day 5+: 1 giant candy cane
 // Bone Garden
-//    "skeleton"			days 1-5: 5 skeletons per day
-//    "skulldozer"			day 6+: fight with skulldozer
+//    "skeleton"                        days 1-5: 5 skeletons per day
+//    "skulldozer"                      day 6+: fight with skulldozer
 // Beer Garden
-//    "barley"				days 1-7: 3 handfuls of barley and 3 clusters of hops per day
-//    "beer label"			day 3: + 1 fancy beer bottle and 1 fancy beer label
-//    "2 beer labels"			day 5: + 2 fancy beer bottles and 2 fancy beer labels
-//    "3 beer labels"			day 7+: + 3 fancy beer bottles and 3 fancy beer labels
+//    "barley"                          days 1-7: 3 handfuls of barley and 3 clusters of hops per day
+//    "beer label"                      day 3: + 1 fancy beer bottle and 1 fancy beer label
+//    "2 beer labels"                   day 5: + 2 fancy beer bottles and 2 fancy beer labels
+//    "3 beer labels"                   day 7+: + 3 fancy beer bottles and 3 fancy beer labels
 // Winter Garden
-//    "ice harvest"			days 1-7: 3 ice harvests and 3 snow berries per day
-//    "frost flower"			days 3-7+: + 1 frost flower
+//    "ice harvest"                     days 1-7: 3 ice harvests and 3 snow berries per day
+//    "frost flower"                    days 3-7+: + 1 frost flower
 // Thanksgarden
-//    "cornucopia"			day 1: 1 cornucopia
-//    "3 cornucopias"			day 2: 3 cornucopias
-//    "5 cornucopias"			day 3: 5 cornucopias
-//    "8 cornucopias"			day 4: 8 cornucopias
-//    "11 cornucopias"			day 5: 11 cornucopias
-//    "15 cornucopias"			day 6: 15 cornucopias
-//    "magacopia"			day 7+: 1 megacopia
+//    "cornucopia"                      day 1: 1 cornucopia
+//    "3 cornucopias"                   day 2: 3 cornucopias
+//    "5 cornucopias"                   day 3: 5 cornucopias
+//    "8 cornucopias"                   day 4: 8 cornucopias
+//    "11 cornucopias"                  day 5: 11 cornucopias
+//    "15 cornucopias"                  day 6: 15 cornucopias
+//    "magacopia"                       day 7+: 1 megacopia
 // Tall Grass Patch
-//    "tall grass"			days 1-7: 1 patch of tall grass per day
-//    "very tall grass"			days 8+: 1 patch of very tall grass
+//    "tall grass"                      days 1-7: 1 patch of tall grass per day
+//    "very tall grass"                 days 8+: 1 patch of very tall grass
 // Mushroom Garden
-//    "free-range mushroom"		day 1: 1 free-range mushroom
-//    "plump free-range mushroom"	day 2: 1 plump free-range mushroom
-//    "bulky free-range mushroom"	day 3: 1 bulky freerange mushroom
-//    "giant free-range mushroom"	day 4: 1 giant free-range mushroom
-//    "immense free-range mushroom"	day 5: 1 immense free-range mushroom
-//    "colossal free-range mushroom"	day 11+: 1 colossal free-range mushroom
+//    "free-range mushroom"             day 1: 1 free-range mushroom
+//    "plump free-range mushroom"       day 2: 1 plump free-range mushroom
+//    "bulky free-range mushroom"       day 3: 1 bulky freerange mushroom
+//    "giant free-range mushroom"       day 4: 1 giant free-range mushroom
+//    "immense free-range mushroom"     day 5: 1 immense free-range mushroom
+//    "colossal free-range mushroom"    day 11+: 1 colossal free-range mushroom
 // Rock Garden (plot 1)
-//    "groveling gravel"		day 1: 1 groveling gravel
-//    "2 groveling gravel"		day 2: 2 handfuls of groveling gravel
-//    "3 groveling gravel"		day 3: 3 handfuls of groveling gravel
-//    "fruity pebble"			day 4: 1 fruity pebble
-//    "2 fruity pebbles"		day 5: 2 fruity pebbles
-//    "3 fruity pebbles"		day 6: 3 fruity pebbles
-//    "lodestone"			day 7+: lodestone
+//    "groveling gravel"                day 1: 1 groveling gravel
+//    "2 groveling gravel"              day 2: 2 handfuls of groveling gravel
+//    "3 groveling gravel"              day 3: 3 handfuls of groveling gravel
+//    "fruity pebble"                   day 4: 1 fruity pebble
+//    "2 fruity pebbles"                day 5: 2 fruity pebbles
+//    "3 fruity pebbles"                day 6: 3 fruity pebbles
+//    "lodestone"                       day 7+: lodestone
 // Rock Garden (plot 2)
-//    "milestone"			day 1: 1 milestone
-//    "2 milestones"			day 2: 2 milestones
-//    "3 milestones"			day 3: 3 milestones
-//    "bolder boulder"			day 4: 1 bolder boulder
-//    "2 bolder boulders"		day 5: 2 bolder boulders
-//    "3 bolder boulders"		day 6: 3 bolder boulders
-//    "molehill mountain"		day 7+: molehill mountain
+//    "milestone"                       day 1: 1 milestone
+//    "2 milestones"                    day 2: 2 milestones
+//    "3 milestones"                    day 3: 3 milestones
+//    "bolder boulder"                  day 4: 1 bolder boulder
+//    "2 bolder boulders"               day 5: 2 bolder boulders
+//    "3 bolder boulders"               day 6: 3 bolder boulders
+//    "molehill mountain"               day 7+: molehill mountain
 // Rock Garden (plot 3)
-//    "whet stone"			day 1: 1 whet stone
-//    "2 whet stones"			day 2: 2 whet stones
-//    "3 whet stones"			day 3: 3 whet stones
-//    "hard rock"			day 4: 1 hard rocks
-//    "2 hard rocks"			day 5: 2 hard rocks
-//    "3 hard rocks"			day 6: 3 hard rocks
-//    "strange stalagmite"		day 7+: strange stalagmite
+//    "whet stone"                      day 1: 1 whet stone
+//    "2 whet stones"                   day 2: 2 whet stones
+//    "3 whet stones"                   day 3: 3 whet stones
+//    "hard rock"                       day 4: 1 hard rocks
+//    "2 hard rocks"                    day 5: 2 hard rocks
+//    "3 hard rocks"                    day 6: 3 hard rocks
+//    "strange stalagmite"              day 7+: strange stalagmite
 //
 // You may specify one crop from each kind of garden, separated by "|".
 // If you specify no crops, picking your garden will be deferred to
@@ -849,12 +849,12 @@ void harvest_garden()
 
 	    // If a garden has multiple plots, pick it and look for more.
 	    if (plot != "") {
-		// cli_execute( "garden pick " + plot );
+		cli_execute( "garden pick " + plot );
 		continue;
 	    }
 
 	    // Otherwise, pick the whole garden in one go.
-	    // cli_execute( "garden pick" );
+	    cli_execute( "garden pick" );
 	    break;
 	}
 
