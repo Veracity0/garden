@@ -274,7 +274,7 @@ void parse_garden()
 	    continue;
 
         // Patch of Tall Grass crops are not items.
-	// We use days of growth to recognize what is there
+        // We use days of growth to recognize what is there
 
         // Mushroom Gardens do generate items, but, for whatever reason,
         // KoLmafia does not include the current item in the campground.
