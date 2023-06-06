@@ -3,7 +3,7 @@ import <vprops.ash>;
 // "breakfast" allows you to specify a single crop from your garden.
 // Alternatively, you can specify "Harvest Anything" or "Harvest Nothing"
 //
-// Since there are seven different kinds of garden, unless you want to
+// Since there are nine different kinds of garden, unless you want to
 // always or never harvest your garden, you need to change your
 // breakfast setting every time you change your garden.
 //
@@ -132,12 +132,182 @@ string_set garden_crops = define_property( "VGH.GardenCrops", "string", "pumpkin
 boolean use_fertilizer = define_property( "VGH.FertilizeGrassPatch", "boolean", "false" ).to_boolean();
 
 // ***************************
-//        Validation         *
+//        Constants          *
 // ***************************
+
+static item NO_ITEM = $item[ none ];
+
+// *** Crop Seeds
+
+// These uniquely identify what kind of garden you have.
+
+static item PUMPKIN_SEEDS = $item[ packet of pumpkin seeds ];
+static item PEPPERMINT_PACKET = $item[ Peppermint Pip Packet ];
+static item DRAGON_TEETH = $item[ packet of dragon's teeth ];
+static item BEER_SEEDS = $item[ packet of beer seeds ];
+static item WINTER_SEEDS = $item[ packet of winter seeds ];
+static item THANKSGARDEN_SEEDS = $item[ packet of thanksgarden seeds ];
+static item GRASS_SEEDS = $item[ packet of tall grass seeds ];
+static item MUSHROOM_SPORES = $item[ packet of mushroom spores ];
+static item ROCK_SEEDS = $item[ packet of rock seeds ];
+
+// *** Plot Crops
 
 static item PUMPKIN = $item[ pumpkin ];
 static item HUGE_PUMPKIN = $item[ huge pumpkin ];
 static item GINORMOUS_PUMPKIN = $item[ ginormous pumpkin ];
+
+static item PEPPERMINT_SPROUT = $item[ peppermint sprout ];
+static item GIANT_CANDY_CANE = $item[ giant candy cane ];
+
+static item SKELETON = $item[ skeleton ];
+
+static item BARLEY = $item[ handful of barley ];
+static item BEER_LABEL = $item[ fancy beer label ];
+
+static item ICE_HARVEST = $item[ ice harvest ];
+static item FROST_FLOWER = $item[ frost flower ];
+
+static item CORNUCOPIA = $item[ cornucopia ];
+static item MEGACOPIA = $item[ megacopia ];
+
+static item FREE_RANGE_MUSHROOM = $item[ free-range mushroom ];
+static item PLUMP_FREE_RANGE_MUSHROOM = $item[ plump free-range mushroom ];
+static item BULKY_FREE_RANGE_MUSHROOM = $item[ bulky free-range mushroom ];
+static item GIANT_FREE_RANGE_MUSHROOM = $item[ giant free-range mushroom ];
+static item IMMENSE_FREE_RANGE_MUSHROOM = $item[ immense free-range mushroom ];
+static item COLOSSAL_FREE_RANGE_MUSHROOM = $item[ colossal free-range mushroom ];
+
+static item GROVELING_GRAVEL = $item[ groveling gravel ];
+static item FRUITY_PEBBLE = $item[ fruity pebble ];
+static item LODESTONE = $item[ lodestone ];
+
+static item MILESTONE = $item[ milestone ];
+static item BOLDER_BOULDER = $item[ bolder boulder ];
+static item MOLEHILL_MOUNTAIN = $item[ molehill mountain ];
+
+static item WHET_STONE = $item[ whet stone ];
+static item HARD_ROCK = $item[ hard rock ];
+static item STRANGE_STALAGMITE = $item[ strange stalagmite ];
+
+// Just like KoLmafia: AdventureResult = item + count
+
+record AdventureResult
+{
+    item it;
+    int count;
+};
+
+string to_string(AdventureResult ar )
+{
+    return ar.it + " (" + ar.count + ")";
+}
+
+// *** Character Variables
+
+static AdventureResult NO_RESULT = new AdventureResult( NO_ITEM, 0);
+
+// Campground item corresponding to garden type
+AdventureResult garden_seeds = NO_RESULT;
+
+// Campground items corresponding to individual plots in the garden.
+AdventureResult [string] crops;
+
+void parse_garden()
+{
+    // You can only have one kind of garden in your campground.
+    // A garden can have multiple plots, each with its own crop.
+
+    foreach it, n in get_campground() {
+	switch (it) {
+	case PUMPKIN_SEEDS:
+	case PEPPERMINT_PACKET:
+	case DRAGON_TEETH:
+	case BEER_SEEDS:
+	case WINTER_SEEDS:
+	case THANKSGARDEN_SEEDS:
+	case GRASS_SEEDS:
+	case MUSHROOM_SPORES:
+	case ROCK_SEEDS:
+	    garden_seeds = new AdventureResult(it, n);
+	    continue;
+
+        // Pumpkin Patch crops
+	case PUMPKIN:
+	case HUGE_PUMPKIN:
+	    crops["pumpkin"] = new AdventureResult(it, n);
+	    continue;
+	case GINORMOUS_PUMPKIN:
+	    // A ginormous pumpkin can be a dwelling or a crop.  Since
+	    // KoLmafia includes your dwelling to your campground, we
+	    // can't distinguish here. We'll fix it after we have
+	    // figured out which kind of garden you have.
+	    continue;
+
+        // Peppermint Patch crops
+	case PEPPERMINT_SPROUT:
+	case GIANT_CANDY_CANE:
+	    crops["peppermint"] = new AdventureResult(it, n);
+	    continue;
+
+        // Bone Garden crops
+	case SKELETON:
+	    crops["bone"] = new AdventureResult(it, n);
+	    continue;
+
+        // Beer Garden crops
+	case BARLEY:
+	case BEER_LABEL:
+	    crops["beer"] = new AdventureResult(it, n);
+	    continue;
+
+        // Winter Garden crops
+	case ICE_HARVEST:
+	case FROST_FLOWER:
+	    crops["winter"] = new AdventureResult(it, n);
+	    continue;
+
+        // Thanksgarden crops
+	case CORNUCOPIA:
+	case MEGACOPIA:
+	    crops["thanksgarden"] = new AdventureResult(it, n);
+	    continue;
+
+        // Patch of Tall Grass crops are not items.
+        // We use days of growth to recognize what is there
+
+        // Mushroom Gardens do generate items, but, for whatever reason,
+        // KoLmafia does not include the current item in the campground.
+
+        // Rock Garden crops
+	case GROVELING_GRAVEL:
+	case FRUITY_PEBBLE:
+	case LODESTONE:
+	    crops["plot1"] = new AdventureResult(it, n);
+	    continue;
+	case MILESTONE:
+	case BOLDER_BOULDER:
+	case MOLEHILL_MOUNTAIN:
+	    crops["plot2"] = new AdventureResult(it, n);
+	    continue;
+	case WHET_STONE:
+	case HARD_ROCK:
+	case STRANGE_STALAGMITE:
+	    crops["plot3"] = new AdventureResult(it, n);
+	    continue;
+	}
+    }
+
+    // Now we can determine if you have a ginormous pumpkin in your
+    // garden or if it is only your dwelling.
+    if (garden_seeds.it == PUMPKIN_SEEDS && garden_seeds.count >= 11) {
+	crops["pumpkin"] = new AdventureResult(GINORMOUS_PUMPKIN, 1);
+    }
+}
+
+// ***************************
+//        Validation         *
+// ***************************
 
 static string_set pumpkin_crops = $strings[
     pumpkin,
@@ -145,23 +315,15 @@ static string_set pumpkin_crops = $strings[
     ginormous pumpkin
 ];
 
-static item PEPPERMINT_SPROUT = $item[ peppermint sprout ];
-static item GIANT_CANDY_CANE = $item[ giant candy cane ];
-
 static string_set peppermint_crops = $strings[
     peppermint sprout,
     giant candy cane
 ];
 
-static item SKELETON = $item[ skeleton ];
-
 static string_set bone_crops = $strings[
     skeleton,
     skulldozer
 ];
-
-static item BARLEY = $item[ handful of barley ];
-static item BEER_LABEL = $item[ fancy beer label ];
 
 static string_set beer_crops = $strings[
     barley,
@@ -170,16 +332,10 @@ static string_set beer_crops = $strings[
     3 beer labels
 ];
 
-static item ICE_HARVEST = $item[ ice harvest ];
-static item FROST_FLOWER = $item[ frost flower ];
-
 static string_set winter_crops = $strings[
     ice harvest,
     frost flower
 ];
-
-static item CORNUCOPIA = $item[ cornucopia ];
-static item MEGACOPIA = $item[ megacopia ];
 
 static string_set thanksgarden_crops = $strings[
     cornucopia,
@@ -191,20 +347,10 @@ static string_set thanksgarden_crops = $strings[
     megacopia
 ];
 
-static item GRASS_SEEDS = $item[ packet of tall grass seeds ];
-
 static string_set grass_crops = $strings[
     tall grass,
     very tall grass
 ];
-
-static item MUSHROOM_SPORES = $item[ packet of mushroom spores ];
-static item FREE_RANGE_MUSHROOM = $item[ free-range mushroom ];
-static item PLUMP_FREE_RANGE_MUSHROOM = $item[ plump free-range mushroom ];
-static item BULKY_FREE_RANGE_MUSHROOM = $item[ bulky free-range mushroom ];
-static item GIANT_FREE_RANGE_MUSHROOM = $item[ giant free-range mushroom ];
-static item IMMENSE_FREE_RANGE_MUSHROOM = $item[ immense free-range mushroom ];
-static item COLOSSAL_FREE_RANGE_MUSHROOM = $item[ colossal free-range mushroom ];
 
 static string_set mushroom_crops = $strings[
     free-range mushroom,
@@ -214,12 +360,6 @@ static string_set mushroom_crops = $strings[
     immense free-range mushroom,
     colossal free-range mushroom
 ];
-
-static item ROCK_SEEDS = $item[ packet of rock seeds ];
-
-static item GROVELING_GRAVEL = $item[ groveling gravel ];
-static item FRUITY_PEBBLE = $item[ fruity pebble ];
-static item LODESTONE = $item[ lodestone ];
 
 static string_set rock_plot1_crops = $strings[
     groveling gravel,
@@ -231,10 +371,6 @@ static string_set rock_plot1_crops = $strings[
     lodestone
 ];
 
-static item MILESTONE = $item[ milestone ];
-static item BOLDER_BOULDER = $item[ bolder boulder ];
-static item MOLEHILL_MOUNTAIN = $item[ molehill mountain ];
-
 static string_set rock_plot2_crops = $strings[
     milestone,
     2 milestones,
@@ -244,10 +380,6 @@ static string_set rock_plot2_crops = $strings[
     3 bolder boulders,
     molehill mountain
 ];
-
-static item WHET_STONE = $item[ whet stone ];
-static item HARD_ROCK = $item[ hard rock ];
-static item STRANGE_STALAGMITE = $item[ strange stalagmite ];
 
 static string_set rock_plot3_crops = $strings[
     whet stone,
@@ -362,29 +494,53 @@ void validate_crops()
 }
 
 // ***************************
+//         Utilities         *
+// ***************************
+
+int pre_fertilize_grass(int n)
+{
+    // n is the number of patches of grass currently growing.
+
+    // If you do not want to harvest very tall grass, do not want to use fertilizer, or have no fertilizer, nothing to do
+    if ( vgh_grass_crop != "very tall grass" || !use_fertilizer || fertilizer_available == 0 ) {
+	return 0;
+    }
+
+    // Don't prefertilize if can't achieve 8 grass patches
+    int fertilizer_needed = max( 8 - n, 0 );
+    return fertilizer_available < fertilizer_needed ? 0 : fertilizer_needed;
+}
+
+// ***************************
 //       Master Control      *
 // ***************************
 
-void harvest_garden()
+boolean should_harvest_garden()
 {
-    void print_crop( string garden, string name, string plural, int n )
+    item seeds = garden_seeds.it;
+    int count = garden_seeds.count;
+
+    void print_crop(string garden, string name, string plural, int n)
     {
-	print( "Your " + garden + " has " + ( n == 1 ? ( "1 " + name ) : ( n + " " + plural ) ) + " in it." );
+	print("Your " + garden + " has " + ( n == 1 ? ( "1 " + name ) : ( n + " " + plural ) ) + " in it.");
     }
 
-    void print_crop( string garden, item it, int n )
+    void print_crop(string garden, AdventureResult crop)
     {
-	print_crop( garden, it.name, it.plural, n );
+	print_crop(garden, crop.it.name, crop.it.plural, crop.count);
     }
 
-    boolean harvest_pumpkins( item it, int n )
+    boolean harvest_pumpkins()
     {
-	print_crop( "Pumpkin Patch", it, n );
+	AdventureResult crop = crops["pumpkin"];
+	print_crop("Pumpkin Patch", crop);
 	if ( vgh_pumpkin_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
 	}
 	print( "You want to harvest " + vgh_pumpkin_crop );
+	item it = crop.it;
+	int n = crop.count;
 	switch ( vgh_pumpkin_crop ) {
 	case "pumpkin":
 	    // A pumpkin or anything better. I.e., anything.
@@ -399,14 +555,17 @@ void harvest_garden()
 	return false;
     }
 
-    boolean harvest_peppermint( item it, int n )
+    boolean harvest_peppermint()
     {
-	print_crop( "Peppermint Patch", it, n );
+	AdventureResult crop = crops["peppermint"];
+	print_crop( "Peppermint Patch", crop );
 	if ( vgh_peppermint_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
 	}
 	print( "You want to harvest " + vgh_peppermint_crop );
+	item it = crop.it;
+	int n = crop.count;
 	switch ( vgh_peppermint_crop ) {
 	case "peppermint sprout":
 	    // A peppermint sprout or anything better. I.e., anything.
@@ -418,23 +577,27 @@ void harvest_garden()
 	return false;
     }
 
-    boolean harvest_bones( item it, int n )
+    boolean harvest_bones()
     {
-	if ( n == -1 ) {
+	AdventureResult crop = crops["bone"];
+	item it = crop.it;
+	int n = crop.count;
+
+	if (n == -1) {
 	    print( "Your Bone Garden has a Skulldozer in it." );
-	    if ( my_adventures() < 1 ) {
+	    if (my_adventures() < 1) {
 		print( "Fighting it takes a turn, but you have none left today." );
 		print( "You can fight it drunk. Perhaps you should have a drink?" );
 		return false;
 	    }
-	    if ( vgh_bone_crop == "skulldozer" ) {
+	    if (vgh_bone_crop == "skulldozer") {
 		return true;
 	    }
 	    print( "Gear up and fight it!" );
 	    return false;
 	}
 
-	print_crop( "Bone Garden", it, n );
+	print_crop( "Bone Garden", crop );
 	if ( vgh_bone_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
@@ -447,14 +610,17 @@ void harvest_garden()
 	return n > 0;
     }
 
-    boolean harvest_beer( item it, int n )
+    boolean harvest_beer()
     {
-	print_crop( "Beer Garden", it, n );
+	AdventureResult crop = crops["beer"];
+	print_crop( "Beer Garden", crop );
 	if ( vgh_beer_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
 	}
 	print( "You want to harvest " + vgh_beer_crop );
+	item it = crop.it;
+	int n = crop.count;
 	switch ( vgh_beer_crop ) {
 	case "barley":
 	    // barley or anything better. I.e., anything.
@@ -472,14 +638,17 @@ void harvest_garden()
 	return false;
     }
 
-    boolean harvest_winter( item it, int n )
+    boolean harvest_winter()
     {
-	print_crop( "Winter Garden", it, n );
+	AdventureResult crop = crops["winter"];
+	print_crop( "Winter Garden", crop );
 	if ( vgh_winter_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
 	}
 	print( "You want to harvest " + vgh_winter_crop );
+	item it = crop.it;
+	int n = crop.count;
 	switch ( vgh_winter_crop ) {
 	case "ice harvest":
 	    // any number of ice harvests. I.e., anything
@@ -491,14 +660,17 @@ void harvest_garden()
 	return false;
     }
 
-    boolean harvest_thanksgarden( item it, int n )
+    boolean harvest_thanksgarden()
     {
-	print_crop( "Thanksgarden", it, n );
+	AdventureResult crop = crops["thanksgarden"];
+	print_crop( "Thanksgarden", crop );
 	if ( vgh_thanksgarden_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
 	}
 	print( "You want to harvest " + vgh_thanksgarden_crop );
+	item it = crop.it;
+	int n = crop.count;
 	switch ( vgh_thanksgarden_crop ) {
 	case "cornucopia":
 	    // Any number of cornucopias. I.e., anything
@@ -520,20 +692,13 @@ void harvest_garden()
 	return false;
     }
 
-    int pre_fertilize_grass( int n )
+    boolean harvest_grass()
     {
-	// If you do not want to harvest very tall grass, do not want to use fertilizer, or have no fertilizer, nothing to do
-	if ( vgh_grass_crop != "very tall grass" || !use_fertilizer || fertilizer_available == 0 ) {
-	    return 0;
-	}
+	// Currently growing patches of grass
+	AdventureResult crop = garden_seeds;
+	int n = crop.count;
 
-	// Don't prefertilize if can't achieve 8 grass patches
-	int fertilizer_needed = max( 8 - n, 0 );
-	return fertilizer_available < fertilizer_needed ? 0 : fertilizer_needed;
-    }
-
-    boolean harvest_grass( int n, int fertilizer_used )
-    {
+	int fertilizer_used = pre_fertilize_grass(n);
 	if ( fertilizer_used > 0 ) {
 	    print( "(After using " + fertilizer_used + " " + FERTILIZER + ")" );
 	    n += fertilizer_used;
@@ -558,44 +723,12 @@ void harvest_garden()
 	return false;
     }
 
-    void fertilize_grass( int count )
+    boolean harvest_mushrooms()
     {
-	// If you do not want to harvest grass, or do not want to use fertilizer, nothing to do
-	if ( vgh_grass_crop == "" || !use_fertilizer || fertilizer_available == 0 ) {
-	    return;
-	}
+	// Currently growing mushrooms
+	AdventureResult crop = garden_seeds;
+	int n = crop.count;
 
-	while ( count-- > 0 ) {
-	    print( "" );
-	    use( 1, FERTILIZER );
-	    fertilizer_available--;
-	}
-    }
-
-    void fertilize_and_pick_grass()
-    {
-	// This will be called after pre-fertilizing and picking your Tall Grass Patch
-	// It will use up your remaining fertilizer for simple tall grass patches
-
-	// If you do not want to harvest tall grass, or do not want to use fertilizer, nothing to do
-	if ( vgh_grass_crop != "tall grass" || !use_fertilizer || fertilizer_available == 0 ) {
-	    return;
-	}
-
-	print( "" );
-	print( "Using up " + FERTILIZER + " harvesting tall grass." );
-
-	// Tall grass or anything better. I.e., anything.
-	// Must have fertilizer left after pre-fertilizing
-	while ( fertilizer_available > 0 ) {
-	    // Use up to 7 fertilizers before picking
-	    fertilize_grass( min( fertilizer_available, 7 ) );
-	    cli_execute( "garden pick" );
-	}
-    }
-
-    boolean harvest_mushrooms( int n )
-    {
 	item spores_to_shroom()
 	{
 	    return
@@ -607,8 +740,7 @@ void harvest_garden()
 		COLOSSAL_FREE_RANGE_MUSHROOM;
 	}
 
-	item shroom = spores_to_shroom();
-	print_crop( "Mushroom Garden", shroom, 1 );
+	print_crop( "Mushroom Garden", new AdventureResult(spores_to_shroom(), 1) );
 	if ( vgh_mushroom_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
@@ -631,258 +763,315 @@ void harvest_garden()
 	return false;
     }
 
-    boolean harvest_rock_plot1( item it, int n )
+    boolean harvest_rocks()
     {
-	print_crop( "Rock Garden plot 1", it, n );
-	if ( vgh_rock_plot1_crop == "" ) {
-	    print( "You do not want to automatically harvest this kind of garden." );
+	boolean harvest_rock_plot1()
+	{
+	    AdventureResult crop = crops["plot1"];
+	    print_crop( "Rock Garden plot 1", crop );
+	    if ( vgh_rock_plot1_crop == "" ) {
+		print( "You do not want to automatically harvest this kind of garden." );
+		return false;
+	    }
+	    print( "You want to harvest " + vgh_rock_plot1_crop );
+	    item it = crop.it;
+	    int n = crop.count;
+	    switch ( vgh_rock_plot1_crop ) {
+	    case "groveling gravel":
+		// At least 1 groveling gravel. I.e. anything
+		return n > 0;
+	    case "2 groveling gravel":
+		// At least 2 handfuls of groveling gravel - or anything later.
+		return it.name == "groveling gravel" ? n >= 2 : true;
+	    case "3 groveling gravel":
+		// At least 3 handfuls of groveling gravel - or anything later.
+		return it.name == "groveling gravel" ? n >= 3 : true;
+	    case "fruity pebble":
+		// At least 1 fruity pebble. I.e., anything past groveling gravel
+		return it != GROVELING_GRAVEL;
+	    case "2 fruity pebbles":
+		// At least 2 fruity pebbles - or anything later.
+		return it.name == "fruity pebble" ? n >= 2 : it != GROVELING_GRAVEL;
+	    case "3 fruity pebbles":
+		// At least 3 fruity pebbles - or anything later.
+		return it.name == "fruity pebble" ? n >= 3 : it != GROVELING_GRAVEL;
+	    case "lodestone":
+		// A lodestone
+		return it == LODESTONE;
+	    }
 	    return false;
 	}
-	print( "You want to harvest " + vgh_rock_plot1_crop );
-	switch ( vgh_rock_plot1_crop ) {
-	case "groveling gravel":
-	    // At least 1 groveling gravel. I.e. anything
-	    return n > 0;
-	case "2 groveling gravel":
-	    // At least 2 handfuls of groveling gravel - or anything later.
-	    return it.name == "groveling gravel" ? n >= 2 : true;
-	case "3 groveling gravel":
-	    // At least 3 handfuls of groveling gravel - or anything later.
-	    return it.name == "groveling gravel" ? n >= 3 : true;
-	case "fruity pebble":
-	    // At least 1 fruity pebble. I.e., anything past groveling gravel
-	    return it != GROVELING_GRAVEL;
-	case "2 fruity pebbles":
-	    // At least 2 fruity pebbles - or anything later.
-	    return it.name == "fruity pebble" ? n >= 2 : it != GROVELING_GRAVEL;
-	case "3 fruity pebbles":
-	    // At least 3 fruity pebbles - or anything later.
-	    return it.name == "fruity pebble" ? n >= 3 : it != GROVELING_GRAVEL;
-	case "lodestone":
-	    // A lodestone
-	    return it == LODESTONE;
-	}
-	return false;
-    }
 
-    boolean harvest_rock_plot2( item it, int n )
-    {
-	print_crop( "Rock Garden plot 2", it, n );
-	if ( vgh_rock_plot2_crop == "" ) {
-	    print( "You do not want to automatically harvest this kind of garden." );
+	boolean harvest_rock_plot2()
+	{
+	    AdventureResult crop = crops["plot2"];
+	    print_crop( "Rock Garden plot 2", crop );
+	    if ( vgh_rock_plot2_crop == "" ) {
+		print( "You do not want to automatically harvest this kind of garden." );
+		return false;
+	    }
+	    print( "You want to harvest " + vgh_rock_plot2_crop );
+	    item it = crop.it;
+	    int n = crop.count;
+	    switch ( vgh_rock_plot2_crop ) {
+	    case "milestone":
+		// At least 1 milestone. I.e. anything
+		return n > 0;
+	    case "2 milestones":
+		// At least 2 milestones - or anything later.
+		return it.name == "milestone" ? n >= 2 : true;
+	    case "3 milestones":
+		// At least 3 milestones - or anything later.
+		return it.name == "milestones" ? n >= 3 : true;
+	    case "bolder boulder":
+		// At least 1 bolder boulder. I.e., anything past milestone
+		return it != MILESTONE;
+	    case "2 bolder boulders":
+		// At least 2 bolder boulders - or anything later.
+		return it.name == "bolder boulder" ? n >= 2 : it != MILESTONE;
+	    case "3 bolder boulders":
+		// At least 3 bolder boulders - or anything later.
+		return it.name == "bolder boulder" ? n >= 3 : it != MILESTONE;
+	    case "molehill mountain":
+		// A molehill mountain
+		return it == MOLEHILL_MOUNTAIN;
+	    }
 	    return false;
 	}
-	print( "You want to harvest " + vgh_rock_plot2_crop );
-	switch ( vgh_rock_plot2_crop ) {
-	case "milestone":
-	    // At least 1 milestone. I.e. anything
-	    return n > 0;
-	case "2 milestones":
-	    // At least 2 milestones - or anything later.
-	    return it.name == "milestone" ? n >= 2 : true;
-	case "3 milestones":
-	    // At least 3 milestones - or anything later.
-	    return it.name == "milestones" ? n >= 3 : true;
-	case "bolder boulder":
-	    // At least 1 bolder boulder. I.e., anything past milestone
-	    return it != MILESTONE;
-	case "2 bolder boulders":
-	    // At least 2 bolder boulders - or anything later.
-	    return it.name == "bolder boulder" ? n >= 2 : it != MILESTONE;
-	case "3 bolder boulders":
-	    // At least 3 bolder boulders - or anything later.
-	    return it.name == "bolder boulder" ? n >= 3 : it != MILESTONE;
-	case "molehill mountain":
-	    // A molehill mountain
-	    return it == MOLEHILL_MOUNTAIN;
-	}
-	return false;
-    }
 
-    boolean harvest_rock_plot3( item it, int n )
-    {
-	print_crop( "Rock Garden plot 3", it, n );
-	if ( vgh_rock_plot3_crop == "" ) {
-	    print( "You do not want to automatically harvest this kind of garden." );
+	boolean harvest_rock_plot3()
+	{
+	    AdventureResult crop = crops["plot3"];
+	    print_crop( "Rock Garden plot 3", crop );
+	    if ( vgh_rock_plot3_crop == "" ) {
+		print( "You do not want to automatically harvest this kind of garden." );
+		return false;
+	    }
+	    print( "You want to harvest " + vgh_rock_plot3_crop );
+	    item it = crop.it;
+	    int n = crop.count;
+	    switch ( vgh_rock_plot3_crop ) {
+	    case "whet stone":
+		// At least 1 whet stone. I.e. anything
+		return n > 0;
+	    case "2 whet stones":
+		// At least 2 whet stones - or anything later.
+		return it.name == "whet stone" ? n >= 2 : true;
+	    case "3 whet stones":
+		// At least 3 whet stones - or anything later.
+		return it.name == "whet stone" ? n >= 3 : true;
+	    case "hard rock":
+		// At least 1 hard rock. I.e., anything past whet stone
+		return it != WHET_STONE;
+	    case "2 hard rocks":
+		// At least 2 hard rocks - or anything later.
+		return it.name == "hard rock" ? n >= 2 : it != WHET_STONE;
+	    case "3 hard rocks":
+		// At least 3 hard rocks - or anything later.
+		return it.name == "hard rock" ? n >= 3 : it != WHET_STONE;
+	    case "strange stalagmite":
+		// A strange stalagmite
+		return it == STRANGE_STALAGMITE;
+	    }
 	    return false;
 	}
-	print( "You want to harvest " + vgh_rock_plot3_crop );
-	switch ( vgh_rock_plot3_crop ) {
-	case "whet stone":
-	    // At least 1 whet stone. I.e. anything
-	    return n > 0;
-	case "2 whet stones":
-	    // At least 2 whet stones - or anything later.
-	    return it.name == "whet stone" ? n >= 2 : true;
-	case "3 whet stones":
-	    // At least 3 whet stones - or anything later.
-	    return it.name == "whet stone" ? n >= 3 : true;
-	case "hard rock":
-	    // At least 1 hard rock. I.e., anything past whet stone
-	    return it != WHET_STONE;
-	case "2 hard rocks":
-	    // At least 2 hard rocks - or anything later.
-	    return it.name == "hard rock" ? n >= 2 : it != WHET_STONE;
-	case "3 hard rocks":
-	    // At least 3 hard rocks - or anything later.
-	    return it.name == "hard rock" ? n >= 3 : it != WHET_STONE;
-	case "strange stalagmite":
-	    // A strange stalagmite
-	    return it == STRANGE_STALAGMITE;
+
+	if (!harvest_rock_plot1()) {
+	    remove crops["plot1"];
+	    print( "Let it grow some more." );
 	}
-	return false;
+	if (!harvest_rock_plot2()) {
+	    remove crops["plot2"];
+	    print( "Let it grow some more." );
+	}
+	if (!harvest_rock_plot3()) {
+	    remove crops["plot3"];
+	    print( "Let it grow some more." );
+	}
+
+	return count(crops) > 0;
     }
 
+    switch (seeds) {
+    case PUMPKIN_SEEDS:
+	return harvest_pumpkins();
+    case PEPPERMINT_PACKET:
+	return harvest_peppermint();
+    case DRAGON_TEETH:
+	return harvest_bones();
+    case BEER_SEEDS:
+	return harvest_beer();
+    case WINTER_SEEDS:
+	return harvest_winter();
+    case THANKSGARDEN_SEEDS:
+	return harvest_thanksgarden();
+    case GRASS_SEEDS:
+	return harvest_grass();
+    case MUSHROOM_SPORES:
+	return harvest_mushrooms();
+    case ROCK_SEEDS:
+	return harvest_rocks();
+    }
+
+    return false;
+}
+
+void harvest_crops()
+{
+    item seeds = garden_seeds.it;
+    int count = garden_seeds.count;
+
+    void harvest_all()
+    {
+	print( "It's time to harvest!" );
+	cli_execute( "garden pick" );
+    }
+
+    void harvest_plot(string plot)
+    {
+	print( "It's time to harvest " + plot + "!" );
+	cli_execute( "garden pick " + plot );
+    }
+
+    void harvest_bones()
+    {
+	AdventureResult crop = crops["plot3"];
+	int n = crop.count;
+
+	if (n == -1) {
+	    print( "Fight! Fight! Fight!" );
+	    visit_url( "campground.php?action=garden" );
+	    run_combat();
+	    return;
+	}
+	harvest_all();
+    }
+
+    void harvest_grass()
+    {
+	AdventureResult crop = garden_seeds;
+	int n = crop.count;
+	int pre_fertilize = pre_fertilize_grass(n);
+
+	void fertilize_grass( int count )
+	{
+	    // If you do not want to harvest grass, or do not want to use fertilizer, nothing to do
+	    if ( vgh_grass_crop == "" || !use_fertilizer || fertilizer_available == 0 ) {
+		return;
+	    }
+
+	    while ( count-- > 0 ) {
+		print( "" );
+		use( 1, FERTILIZER );
+		fertilizer_available--;
+	    }
+	}
+
+	void fertilize_and_pick_grass()
+	{
+	    // This will be called after pre-fertilizing and picking your Tall Grass Patch
+	    // It will use up your remaining fertilizer for simple tall grass patches
+
+	    // If you do not want to harvest tall grass, or do not want to use fertilizer, nothing to do
+	    if ( vgh_grass_crop != "tall grass" || !use_fertilizer || fertilizer_available == 0 ) {
+		return;
+	    }
+
+	    print( "" );
+	    print( "Using up " + FERTILIZER + " harvesting tall grass." );
+
+	    // Tall grass or anything better. I.e., anything.
+	    // Must have fertilizer left after pre-fertilizing
+	    while ( fertilizer_available > 0 ) {
+		// Use up to 7 fertilizers before picking
+		fertilize_grass( min( fertilizer_available, 7 ) );
+		cli_execute( "garden pick" );
+	    }
+	}
+
+	print( "It's time to harvest!" );
+
+	// Optionally fertilize it
+	fertilize_grass( pre_fertilize );
+	// Pick your crop
+	cli_execute( "garden pick" );
+	// Optionally fertilize and pick more tall grass.
+	fertilize_and_pick_grass();
+    }
+
+    void harvest_rocks()
+    {
+	if (crops contains "plot1") {
+	    harvest_plot("plot1");
+	}
+	if (crops contains "plot2") {
+	    harvest_plot("plot2");
+	}
+	if (crops contains "plot3") {
+	    harvest_plot("plot3");
+	}
+    }
+
+    switch (seeds) {
+    case PUMPKIN_SEEDS:
+    case PEPPERMINT_PACKET:
+    case BEER_SEEDS:
+    case WINTER_SEEDS:
+    case THANKSGARDEN_SEEDS:
+    case MUSHROOM_SPORES:
+	// Ordinary single-plot gardens
+	harvest_all();
+	break;
+    case DRAGON_TEETH:
+	// You might have a skulldozer
+	harvest_bones();
+	break;
+    case GRASS_SEEDS:
+	// You might need to fertilize first
+	harvest_grass();
+	break;
+    case ROCK_SEEDS:
+	// Three different plots
+	harvest_rocks();
+	break;
+    }
+}
+
+void harvest_garden()
+{
+    // If no crops are configured, do nothing.
     if ( count( garden_crops ) == 0 ) {
 	return;
     }
 
-    int [item] campground = get_campground();
-    boolean have_garden = false;
+    // See what kind of garden we have and what is currently growing in it.
+    parse_garden();
 
-    foreach it, n in campground {
-	// You can only have one kind of garden in your campground.
-	// 
-	// A garden can have multiple plots, each with its own crop.
-	//
-	// If we detect such a plot, we must continue the loop and look
-	// for additonal plots
+    if (garden_seeds.it == NO_RESULT.it) {
+	print( "You don't have a garden in your campground." );
+	return;
+    }
 
-	boolean should_harvest = false;
-	string plot = "";
-
-	// Certain kinds of garden require special handling
-	boolean fight_skulldozer = false;
-	boolean have_grass_patch = false;
-	int pre_fertilize = 0;
-	boolean have_mushroom_garden = false;
-
-	switch ( it ) {
-	case PUMPKIN:
-	case HUGE_PUMPKIN:
-	case GINORMOUS_PUMPKIN:
-	    have_garden = true;
-	    should_harvest = harvest_pumpkins( it, n );
-	    break;
-	case PEPPERMINT_SPROUT:
-	case GIANT_CANDY_CANE:
-	    have_garden = true;
-	    should_harvest = harvest_peppermint( it, n );
-	    break;
-	case SKELETON:
-	    have_garden = true;
-	    should_harvest = harvest_bones( it, n );
-	    fight_skulldozer = should_harvest && ( n == -1 );
-	    break;
-	case BARLEY:
-	case BEER_LABEL:
-	    have_garden = true;
-	    should_harvest = harvest_beer( it, n );
-	    break;
-	case ICE_HARVEST:
-	case FROST_FLOWER:
-	    have_garden = true;
-	    should_harvest = harvest_winter( it, n );
-	    break;
-	case CORNUCOPIA:
-	case MEGACOPIA:
-	    have_garden = true;
-	    should_harvest = harvest_thanksgarden( it, n );
-	    break;
-	case GRASS_SEEDS:
-	    have_garden = true;
-	    have_grass_patch = true;
-	    pre_fertilize = pre_fertilize_grass( n );
-	    should_harvest = harvest_grass( n, pre_fertilize );
-	    break;
+    // See if our garden is ready to harvest now.
+    if (!should_harvest_garden()) {
+	switch (garden_seeds.it) {
 	case MUSHROOM_SPORES:
-	    have_garden = true;
-	    have_mushroom_garden = true;
-	    should_harvest = harvest_mushrooms( n );
-	    break;
-	case ROCK_SEEDS:
-	    have_garden = true;
-	    continue;
-	case GROVELING_GRAVEL:
-	case FRUITY_PEBBLE:
-	case LODESTONE:
-	    have_garden = true;
-	    plot = "plot1";
-	    should_harvest = harvest_rock_plot1( it, n);
-	    break;
-	case MILESTONE:
-	case BOLDER_BOULDER:
-	case MOLEHILL_MOUNTAIN:
-	    have_garden = true;
-	    plot = "plot2";
-	    should_harvest = harvest_rock_plot2( it, n);
-	    break;
-	case WHET_STONE:
-	case HARD_ROCK:
-	case STRANGE_STALAGMITE:
-	    have_garden = true;
-	    plot = "plot3";
-	    should_harvest = harvest_rock_plot3( it, n);
-	    break;
-	default:
-	    continue;
-	}
-
-	if ( fight_skulldozer ) {
-	    print( "Fight! Fight! Fight!" );
-	    visit_url( "campground.php?action=garden" );
-	    run_combat();
-	    break;
-	}
-
-	if ( should_harvest ) {
-	    print( "It's time to harvest!" );
-	    if ( have_grass_patch ) {
-		// Optionally fertilize it
-		fertilize_grass( pre_fertilize );
-		// Pick your crop
-		cli_execute( "garden pick" );
-		// Optionally fertilize and pick it
-		fertilize_and_pick_grass();
-		break;
-	    }
-
-	    // If a garden has multiple plots, pick it and look for more.
-	    if (plot != "") {
-		cli_execute( "garden pick " + plot );
-		continue;
-	    }
-
-	    // Otherwise, pick the whole garden in one go.
-	    cli_execute( "garden pick" );
-	    break;
-	}
-
-	if ( have_mushroom_garden ) {
 	    if ( vgh_mushroom_crop != "" ) {
 		print( "Let's fertilize your mushroom so it will grow." );
 		cli_execute( "garden fertilize" );
 	    }
 	    break;
+	case ROCK_SEEDS:
+	    // We already said that each plot needs to grow some more.
+	    return;
 	}
 
 	print( "Let it grow some more." );
-
-	// If you have a Tall Grass Patch, optionally fertilize and pick it
-	if ( have_grass_patch ) {
-	    fertilize_and_pick_grass();
-	}
-
-	// If the garden doesn't have multiple plots, we're done
-	if ( plot == "" ) {
-	    break;
-	}
-    }
-
-    if (!have_garden) {
-	print( "You don't have a garden in your campground." );
 	return;
     }
+
+    // We are ready to harvest (at least one plot)!
+    harvest_crops();
 }
 
 void main()
