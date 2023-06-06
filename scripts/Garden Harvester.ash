@@ -935,7 +935,7 @@ void harvest_crops()
 
     void harvest_bones()
     {
-	AdventureResult crop = crops["plot3"];
+	AdventureResult crop = crops["bone"];
 	int n = crop.count;
 
 	if (n == -1) {
