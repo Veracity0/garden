@@ -704,9 +704,14 @@ boolean should_harvest_garden()
 	    n += fertilizer_used;
 	}
 
-	string name = n < 8 ? "patch of tall grass" : "patch of very tall grass";
-	string plural = n == 1 ? "patch of tall grass" : n == 8 ? "patch of very tall grass" : "patches of tall grass";
-	print_crop( "Tall Grass Garden", name, plural, n );
+	if (n < 8) {
+	    string name = "patch of tall grass";
+	    string plural = n == 1 ? "patch of tall grass" : "patches of tall grass";
+	    print_crop( "Tall Grass Garden", name, plural, n );
+	} else {
+	    string name = "patch of very tall grass";
+	    print_crop( "Tall Grass Garden", name, name, 1 );
+	}
 	if ( vgh_grass_crop == "" ) {
 	    print( "You do not want to automatically harvest this kind of garden." );
 	    return false;
@@ -935,10 +940,7 @@ void harvest_crops()
 
     void harvest_bones()
     {
-	AdventureResult crop = crops["bone"];
-	int n = crop.count;
-
-	if (n == -1) {
+	if (count == -1) {
 	    print( "Fight! Fight! Fight!" );
 	    visit_url( "campground.php?action=garden" );
 	    run_combat();
@@ -949,21 +951,18 @@ void harvest_crops()
 
     void harvest_grass()
     {
-	AdventureResult crop = garden_seeds;
-	int n = crop.count;
-	int pre_fertilize = pre_fertilize_grass(n);
-
-	void fertilize_grass( int count )
+	void fertilize_grass( int n )
 	{
 	    // If you do not want to harvest grass, or do not want to use fertilizer, nothing to do
 	    if ( vgh_grass_crop == "" || !use_fertilizer || fertilizer_available == 0 ) {
 		return;
 	    }
 
-	    while ( count-- > 0 ) {
+	    while ( n-- > 0 ) {
 		print( "" );
 		use( 1, FERTILIZER );
 		fertilizer_available--;
+		count++;
 	    }
 	}
 
@@ -992,7 +991,7 @@ void harvest_crops()
 	print( "It's time to harvest!" );
 
 	// Optionally fertilize it
-	fertilize_grass( pre_fertilize );
+	fertilize_grass( pre_fertilize_grass(count) );
 	// Pick your crop
 	cli_execute( "garden pick" );
 	// Optionally fertilize and pick more tall grass.
