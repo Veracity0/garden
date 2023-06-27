@@ -517,9 +517,6 @@ int pre_fertilize_grass(int n)
 
 boolean should_harvest_garden()
 {
-    item seeds = garden_seeds.it;
-    int count = garden_seeds.count;
-
     void print_crop(string garden, string name, string plural, int n)
     {
 	print("Your " + garden + " has " + ( n == 1 ? ( "1 " + name ) : ( n + " " + plural ) ) + " in it.");
@@ -897,7 +894,7 @@ boolean should_harvest_garden()
 	return count(crops) > 0;
     }
 
-    switch (seeds) {
+    switch (garden_seeds.it) {
     case PUMPKIN_SEEDS:
 	return harvest_pumpkins();
     case PEPPERMINT_PACKET:
@@ -923,9 +920,6 @@ boolean should_harvest_garden()
 
 void harvest_crops()
 {
-    item seeds = garden_seeds.it;
-    int count = garden_seeds.count;
-
     void harvest_all()
     {
 	print( "It's time to harvest!" );
@@ -940,7 +934,9 @@ void harvest_crops()
 
     void harvest_bones()
     {
-	if (count == -1) {
+	AdventureResult crop = crops["bone"];
+	int n = crop.count;
+	if (n == -1) {
 	    print( "Fight! Fight! Fight!" );
 	    visit_url( "campground.php?action=garden" );
 	    run_combat();
@@ -951,6 +947,8 @@ void harvest_crops()
 
     void harvest_grass()
     {
+	int count = garden_seeds.count;
+
 	void fertilize_grass( int n )
 	{
 	    // If you do not want to harvest grass, or do not want to use fertilizer, nothing to do
@@ -1011,7 +1009,7 @@ void harvest_crops()
 	}
     }
 
-    switch (seeds) {
+    switch (garden_seeds.it) {
     case PUMPKIN_SEEDS:
     case PEPPERMINT_PACKET:
     case BEER_SEEDS:
